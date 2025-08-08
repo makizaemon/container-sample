@@ -1,12 +1,14 @@
 version: 0.2
-
 env:
   variables:
     ECR_REPOSITORY: "331690204195.dkr.ecr.ap-northeast-1.amazonaws.com/test-ecr"
-
 phases:
   pre_build:
     commands:
+      - echo "Current AWS identity:"
+      - aws sts get-caller-identity
+      - echo "ECR repositories:"
+      - aws ecr describe-repositories --region ap-northeast-1 || echo "ECR access failed"
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin ${ECR_REPOSITORY}
   build:
@@ -28,7 +30,6 @@ phases:
           }
         ]' > imagedefinitions.json
       - echo imagedefinitions.json created.
-
 artifacts:
   files:
     - imagedefinitions.json
